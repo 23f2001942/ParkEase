@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+instance/
+.env
+
+# Node
+node_modules/
+dist/
+.env.local
+
+# VSCode
+.vscode/
+
+# Others
+*.sqlite3
+.DS_Store
