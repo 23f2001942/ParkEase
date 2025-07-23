@@ -1,11 +1,12 @@
+**/__pycache__/
+
 # backend
-backend/__pycache__/
 backend/*.pyc
 backend/instance/
 backend/.env
 backend/venv/
 backend/*.sqlite3
-/backend/migrations/__pycache__/
+/backend/migrations/*.pyc
 
 # frontend
 frontend/node_modules/
