@@ -5,6 +5,7 @@ backend/instance/
 backend/.env
 backend/venv/
 backend/*.sqlite3
+/backend/migrations/__pycache__/
 
 # frontend
 frontend/node_modules/
