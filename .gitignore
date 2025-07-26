@@ -6,7 +6,7 @@ backend/instance/
 backend/.env
 backend/venv/
 backend/*.sqlite3
-/backend/migrations/*.pyc
+backend/parkease.db
 
 # frontend
 frontend/node_modules/
