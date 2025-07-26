@@ -2,6 +2,7 @@
 
 import click
 from flask import Flask
+from flask_jwt_extended import JWTManager
 from werkzeug.security import generate_password_hash
 
 from config import Config
@@ -10,9 +11,14 @@ from db import db
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-    db.init_app(app)
 
-    # late‐import to avoid circular refs
+    db.init_app(app)
+    JWTManager(app)
+
+    # register blueprints
+    from auth import auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+
     from routes import routes_bp
     app.register_blueprint(routes_bp)
 
@@ -23,7 +29,6 @@ app = create_app()
 @app.cli.command('init-db')
 def init_db():
     """Create all tables and seed default Admin."""
-    # import User here, after db is ready
     from models import User
 
     db.create_all()
@@ -33,10 +38,10 @@ def init_db():
         admin = User(
             username='Admin',
             email='admin@gmail.com',
-            password_hash=generate_password_hash('Admin'),
-            role='admin',
-            full_name='ADMIN'
+            full_name='ADMIN',
+            role='admin'
         )
+        admin.set_password('Admin')
         db.session.add(admin)
         db.session.commit()
         click.echo("Default Admin created (Admin/Admin).")

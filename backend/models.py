@@ -2,6 +2,7 @@
 
 from datetime import datetime, timezone
 from sqlalchemy import Enum as PgEnum, Numeric, DateTime, Text
+from werkzeug.security import generate_password_hash, check_password_hash
 from db import db
 
 USER_ROLE   = ('admin', 'user')
@@ -11,6 +12,7 @@ RES_STATUS  = ('ongoing', 'done')
 
 class User(db.Model):
     __tablename__ = 'users'
+
     id            = db.Column(db.Integer, primary_key=True)
     username      = db.Column(db.String(80),  nullable=False, unique=True)
     email         = db.Column(db.String(120), nullable=False, unique=True)
@@ -39,9 +41,16 @@ class User(db.Model):
         'Reservation', back_populates='user', cascade='all, delete-orphan'
     )
 
+    def set_password(self, password: str):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        return check_password_hash(self.password_hash, password)
+
 
 class ParkingLot(db.Model):
     __tablename__ = 'parking_lots'
+
     id             = db.Column(db.Integer, primary_key=True)
     name           = db.Column(db.String(100), nullable=False)
     address        = db.Column(Text, nullable=False)
@@ -67,36 +76,38 @@ class ParkingLot(db.Model):
 
 class ParkingSpot(db.Model):
     __tablename__ = 'parking_spots'
-    id           = db.Column(db.Integer, primary_key=True)
-    lot_id       = db.Column(db.Integer,
+
+    id            = db.Column(db.Integer, primary_key=True)
+    lot_id        = db.Column(db.Integer,
                              db.ForeignKey('parking_lots.id'),
                              nullable=False)
-    spot_number  = db.Column(db.Integer, nullable=False)
-    status       = db.Column(
+    spot_number   = db.Column(db.Integer, nullable=False)
+    status        = db.Column(
                        PgEnum(*SPOT_STATUS, name='spot_status'),
                        nullable=False,
                        default='A'
                    )
-    created_at   = db.Column(
+    created_at    = db.Column(
                        DateTime(timezone=True),
                        default=lambda: datetime.now(timezone.utc),
                        nullable=False
                    )
-    updated_at   = db.Column(
+    updated_at    = db.Column(
                        DateTime(timezone=True),
                        default=lambda: datetime.now(timezone.utc),
                        onupdate=lambda: datetime.now(timezone.utc),
                        nullable=False
                    )
 
-    lot          = db.relationship('ParkingLot', back_populates='spots')
-    reservations = db.relationship(
+    lot           = db.relationship('ParkingLot', back_populates='spots')
+    reservations  = db.relationship(
         'Reservation', back_populates='spot', cascade='all, delete-orphan'
     )
 
 
 class Reservation(db.Model):
     __tablename__ = 'reservations'
+
     id                = db.Column(db.Integer, primary_key=True)
     spot_id           = db.Column(db.Integer,
                                   db.ForeignKey('parking_spots.id'),
