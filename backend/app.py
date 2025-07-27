@@ -3,6 +3,7 @@
 import click
 from flask import Flask
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 from werkzeug.security import generate_password_hash
 
 from config import Config
@@ -14,6 +15,7 @@ def create_app(config_class=Config):
 
     db.init_app(app)
     JWTManager(app)
+    CORS(app)
 
     # register blueprints
     from auth import auth_bp
