@@ -7,7 +7,8 @@
         <h3>{{ lot.name }}</h3>
         <small>
           <a @click="edit(lot.id)">Edit</a> |
-          <a @click="del(lot.id)">Delete</a>
+          <a @click="del(lot.id)">Delete</a> |
+          <a @click="viewSpots(lot.id)">Spots</a>
         </small>
         <p>Occupied: {{ lot.occupied_spots }} / {{ lot.total_spots }}</p>
       </div>
@@ -22,14 +23,12 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "../services/api";
 
-// initialize as empty array so .length is always safe
 const lots = ref([]);
 const router = useRouter();
 
 async function fetchLots() {
   try {
     const { data } = await api.get("/admin/lots");
-    // handle either array or { lots: [...] } shape
     lots.value = Array.isArray(data)
       ? data
       : Array.isArray(data.lots)
@@ -50,6 +49,9 @@ function edit(id) {
 function del(id) {
   if (!confirm("Delete this lot?")) return;
   api.delete(`/admin/lots/${id}`).then(fetchLots);
+}
+function viewSpots(id) {
+  router.push(`/admin/lots/${id}/spots`);
 }
 
 onMounted(fetchLots);

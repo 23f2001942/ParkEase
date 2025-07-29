@@ -4,15 +4,15 @@
   <div>
     <!-- ADMIN NAVBAR -->
     <div class="admin-nav">
-      <strong>Welcome, Admin!</strong>
-      <router-link to="/admin/dashboard">Home</router-link> |
-      <router-link to="/admin/users">Users</router-link> |
-      <router-link to="/admin/search">Search</router-link> |
-      <router-link to="/admin/summary">Summary</router-link> |
-      <a href="#" @click.prevent="logout">Logout</a>
+      <div class="nav-left">Welcome, Admin!</div>
+      <div class="nav-center">
+        <router-link to="/admin/dashboard">Home</router-link> |
+        <router-link to="/admin/users">Users</router-link> |
+        <router-link to="/admin/search">Search</router-link> |
+        <router-link to="/admin/summary">Summary</router-link> |
+        <a href="#" @click.prevent="logout">Logout</a>
+      </div>
     </div>
-
-    <!-- nested admin view -->
     <router-view />
   </div>
 </template>
@@ -35,8 +35,22 @@ function logout() {
 
 <style>
 .admin-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 1rem;
-  background: #f3f3f3;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #eee;
+}
+.nav-left {
+  flex: 1;
+  text-align: left;
+}
+.nav-center {
+  flex: 1;
+  text-align: center;
+}
+.nav-right {
+  flex: 1;
+  text-align: right;
 }
 </style>

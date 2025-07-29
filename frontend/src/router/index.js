@@ -5,13 +5,17 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import Login from "../views/Login.vue";
 import Signup from "../views/Signup.vue";
-import UserDashboard from "../views/UserDashboard.vue";
 
 import AdminLayout from "../components/AdminLayout.vue";
 import AdminDashboard from "../views/AdminDashboard.vue";
+import AddLot from "../views/AddLot.vue";
+import EditLot from "../views/EditLot.vue";
+import LotSpots from "../views/LotSpots.vue";
 import UsersView from "../views/UsersView.vue";
 import SearchView from "../views/SearchView.vue";
 import SummaryView from "../views/SummaryView.vue";
+
+import UserDashboard from "../views/UserDashboard.vue";
 
 const routes = [
   { path: "/", name: "Home", component: HomeView },
@@ -21,29 +25,30 @@ const routes = [
   {
     path: "/admin",
     component: AdminLayout,
-    meta: { requiresAuth: true, role: "admin", layout: "admin" },
+    meta: { requiresAuth: true, role: "admin" },
     children: [
+      { path: "dashboard", name: "AdminDashboard", component: AdminDashboard },
+
+      { path: "lots/add", name: "AddLot", component: AddLot },
+
       {
-        path: "dashboard",
-        name: "AdminDashboard",
-        component: AdminDashboard,
+        path: "lots/:id/edit",
+        name: "EditLot",
+        component: EditLot,
+        props: true,
       },
+
       {
-        path: "users",
-        name: "Users",
-        component: UsersView,
+        path: "lots/:id/spots",
+        name: "LotSpots",
+        component: LotSpots,
+        props: true,
       },
-      {
-        path: "search",
-        name: "Search",
-        component: SearchView,
-      },
-      {
-        path: "summary",
-        name: "Summary",
-        component: SummaryView,
-      },
-      // default to /admin/dashboard
+
+      { path: "users", name: "Users", component: UsersView },
+      { path: "search", name: "Search", component: SearchView },
+      { path: "summary", name: "Summary", component: SummaryView },
+
       { path: "", redirect: { name: "AdminDashboard" } },
     ],
   },
@@ -55,7 +60,6 @@ const routes = [
     meta: { requiresAuth: true, role: "user" },
   },
 
-  // catch-all
   { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
 

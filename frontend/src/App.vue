@@ -2,7 +2,6 @@
 
 <template>
   <div>
-    <!-- PUBLIC NAVBAR: only when not in an admin and user route -->
     <nav v-if="!isAdminRoute" class="main-nav">
       <div class="nav-left">Welcome to ParkEase</div>
       <div class="nav-center">
@@ -20,7 +19,6 @@
       </div>
     </nav>
 
-    <!-- render either public pages or AdminLayout -->
     <router-view />
   </div>
 </template>
@@ -37,7 +35,7 @@ const isAuth = computed(() => !!auth.token);
 const dashboardPath = computed(() =>
   auth.role === "admin" ? "/admin/dashboard" : "/user/dashboard"
 );
-const isAdminRoute = computed(() => route.meta.layout === "admin");
+const isAdminRoute = computed(() => route.path.startsWith("/admin"));
 
 function logout() {
   localStorage.removeItem("access_token");

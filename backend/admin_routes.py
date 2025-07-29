@@ -72,6 +72,34 @@ def get_lot(lot_id):
     return jsonify(data), 200
 
 
+@admin_bp.route('/lots/<int:lot_id>/spots', methods=['GET'])
+@jwt_required()
+@role_required('admin')
+def list_spots_by_lot(lot_id):
+    lot = ParkingLot.query.get_or_404(lot_id)
+
+    spots = ParkingSpot.query.filter_by(lot_id=lot_id).order_by(ParkingSpot.spot_number).all()
+
+    out = []
+    for s in spots:
+        spot_data = {
+            'id': s.id,
+            'spot_number': s.spot_number,
+            'status': s.status
+        }
+        if s.status == 'O':
+            res = Reservation.query.filter_by(spot_id=s.id, status='ongoing').first()
+            if res:
+                spot_data.update({
+                    'user_id':      res.user_id,
+                    'vehicle_number': res.vehicle_number,
+                    'parking_timestamp': res.parking_timestamp.isoformat()
+                })
+        out.append(spot_data)
+
+    return jsonify(spots=out), 200
+
+
 @admin_bp.route('/lots/<int:lot_id>', methods=['PUT'])
 @jwt_required()
 @role_required('admin')
@@ -93,7 +121,6 @@ def update_lot(lot_id):
             db.session.add(ParkingSpot(lot_id=lot.id, spot_number=num))
 
     elif new_total < old_total:
-        # delete only available spots with number > new_total
         to_delete = ParkingSpot.query.filter(
             ParkingSpot.lot_id==lot.id,
             ParkingSpot.spot_number > new_total,

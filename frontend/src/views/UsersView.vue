@@ -4,7 +4,6 @@
   <div style="padding: 2rem">
     <h1>Registered Users</h1>
 
-    <!-- only show the table if there's at least one user -->
     <table v-if="users.length" border="1" cellpadding="8">
       <thead>
         <tr>
@@ -26,7 +25,6 @@
       </tbody>
     </table>
 
-    <!-- fallback when empty -->
     <p v-else>No users found.</p>
   </div>
 </template>
@@ -40,7 +38,6 @@ const users = ref([]);
 async function fetchUsers() {
   try {
     const { data } = await api.get("/admin/users");
-    // support either { users: [...] } or plain array
     users.value = Array.isArray(data.users)
       ? data.users
       : Array.isArray(data)
