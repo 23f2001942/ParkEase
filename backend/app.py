@@ -8,6 +8,9 @@ from werkzeug.security import generate_password_hash
 
 from config import Config
 from db import db
+from auth import auth_bp
+from routes import routes_bp
+from admin_routes import admin_bp
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -17,12 +20,9 @@ def create_app(config_class=Config):
     JWTManager(app)
     CORS(app)
 
-    # register blueprints
-    from auth import auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/auth')
-
-    from routes import routes_bp
     app.register_blueprint(routes_bp)
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(admin_bp)
 
     return app
 
