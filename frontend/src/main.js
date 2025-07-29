@@ -1,7 +1,18 @@
 // frontend/src/main.js
 
-import { createApp } from "vue";
+import { createApp, reactive } from "vue";
 import App from "./App.vue";
 import router from "./router";
 
-createApp(App).use(router).mount("#app");
+// Create a global reactive auth store
+const auth = reactive({
+  token: localStorage.getItem("access_token"),
+  role: localStorage.getItem("role"),
+});
+
+const app = createApp(App);
+
+// Provide it to all components
+app.provide("auth", auth);
+
+app.use(router).mount("#app");

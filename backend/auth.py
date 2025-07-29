@@ -1,8 +1,11 @@
+# backend/auth.py
+
 from functools import wraps
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
     create_access_token,
     jwt_required,
+    get_jwt,
     get_jwt_identity
 )
 
@@ -15,10 +18,12 @@ def role_required(role):
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            jwt_required()(lambda: None)()  # enforce JWT
-            identity = get_jwt_identity()
-            if identity.get('role') != role:
+            jwt_required()(lambda: None)()
+
+            claims = get_jwt()
+            if claims.get('role') != role:
                 return jsonify(msg="Forbidden"), 403
+
             return fn(*args, **kwargs)
         return wrapper
     return decorator
@@ -61,10 +66,15 @@ def login():
     if not user or not user.check_password(pw):
         return jsonify(msg="Bad credentials"), 401
 
-    identity = {
-        'id': user.id,
+    # 1) Use the user ID (string or int) as the subject
+    # 2) Put role & full_name into additional_claims
+    claims = {
         'role': user.role,
         'full_name': user.full_name
     }
-    token = create_access_token(identity=identity)
+    token = create_access_token(
+        identity=str(user.id),
+        additional_claims=claims
+    )
+
     return jsonify(access_token=token, role=user.role), 200

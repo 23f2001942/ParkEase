@@ -1,7 +1,5 @@
-# backend/routes.py
-
 from flask import Blueprint, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 
 from auth import role_required
 
@@ -23,6 +21,6 @@ def admin_dashboard():
 @jwt_required()
 @role_required('user')
 def user_dashboard():
-    identity = get_jwt_identity()
-    return jsonify(msg=f"Hello, {identity.get('full_name')}!"), 200
-
+    claims = get_jwt()
+    full_name = claims.get('full_name', 'User')
+    return jsonify(msg=f"Hello, {full_name}!"), 200

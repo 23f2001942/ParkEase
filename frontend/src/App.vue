@@ -17,25 +17,26 @@
   </div>
 </template>
 
-<script>
-import { computed } from "vue";
+<script setup>
+import { inject, computed } from "vue";
 import { useRouter } from "vue-router";
 
-export default {
-  setup() {
-    const router = useRouter();
-    const isAuth = computed(() => !!localStorage.getItem("access_token"));
-    const role = computed(() => localStorage.getItem("role"));
-    const dashboardPath = computed(() => {
-      return role.value === "admin" ? "/admin/dashboard" : "/user/dashboard";
-    });
+// Inject the shared auth store
+const auth = inject("auth");
+const router = useRouter();
 
-    function logout() {
-      localStorage.clear();
-      router.push("/");
-    }
+// Reactive computed props
+const isAuth = computed(() => !!auth.token);
+const dashboardPath = computed(() =>
+  auth.role === "admin" ? "/admin/dashboard" : "/user/dashboard"
+);
 
-    return { isAuth, dashboardPath, logout };
-  },
-};
+// Logout handler clears both localStorage and reactive state
+function logout() {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("role");
+  auth.token = null;
+  auth.role = null;
+  router.push("/");
+}
 </script>

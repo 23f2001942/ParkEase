@@ -20,36 +20,39 @@
   </div>
 </template>
 
-<script>
-import { ref } from "vue";
+<script setup>
+import { ref, inject } from "vue";
 import api from "../services/api";
 import { useRouter } from "vue-router";
 
-export default {
-  setup() {
-    const email = ref("");
-    const password = ref("");
-    const error = ref(null);
-    const router = useRouter();
+const email = ref("");
+const password = ref("");
+const error = ref(null);
+const router = useRouter();
 
-    async function onLogin() {
-      error.value = null;
-      try {
-        const { data } = await api.post("/auth/login", {
-          email: email.value,
-          password: password.value,
-        });
-        localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("role", data.role);
-        router.push(
-          data.role === "admin" ? "/admin/dashboard" : "/user/dashboard"
-        );
-      } catch (err) {
-        error.value = err.response?.data?.msg || "Login failed";
-      }
-    }
+// Inject the reactive auth store
+const auth = inject("auth");
 
-    return { email, password, error, onLogin };
-  },
-};
+async function onLogin() {
+  error.value = null;
+  try {
+    const { data } = await api.post("/auth/login", {
+      email: email.value,
+      password: password.value,
+    });
+
+    // 1) Persist to localStorage
+    localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("role", data.role);
+
+    // 2) Update reactive store
+    auth.token = data.access_token;
+    auth.role = data.role;
+
+    // 3) Redirect to appropriate dashboard
+    router.push(data.role === "admin" ? "/admin/dashboard" : "/user/dashboard");
+  } catch (err) {
+    error.value = err.response?.data?.msg || "Login failed";
+  }
+}
 </script>
