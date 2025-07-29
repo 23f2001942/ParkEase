@@ -1,81 +1,71 @@
 <!-- frontend/src/views/Signup.vue -->
 
 <template>
-  <div style="max-width: 400px; margin: 2rem auto">
+  <div class="auth-form">
     <h2>Sign Up</h2>
     <form @submit.prevent="onSignup">
       <div>
-        <label>Email:</label><br />
-        <input v-model="email" type="email" required />
+        <label>Email:</label><input v-model="email" type="email" required />
       </div>
-      <div style="margin-top: 0.5rem">
-        <label>Password:</label><br />
-        <input v-model="password" type="password" required />
+      <div>
+        <label>Password:</label
+        ><input v-model="password" type="password" required />
       </div>
-      <div style="margin-top: 0.5rem">
-        <label>Full Name:</label><br />
-        <input v-model="full_name" required />
-      </div>
-      <div style="margin-top: 0.5rem">
-        <label>Address:</label><br />
-        <textarea v-model="address" required></textarea>
-      </div>
-      <div style="margin-top: 0.5rem">
-        <label>Pin Code:</label><br />
-        <input v-model="pin_code" required />
-      </div>
-      <div style="margin-top: 1rem">
-        <button type="submit">Register</button>
-      </div>
+      <div><label>Full Name:</label><input v-model="full_name" required /></div>
+      <div><label>Address:</label><textarea v-model="address" required /></div>
+      <div><label>Pin Code:</label><input v-model="pin_code" required /></div>
+      <button type="submit">Register</button>
     </form>
-    <p v-if="error" style="color: red">{{ error }}</p>
-    <p v-if="message" style="color: green">{{ message }}</p>
+    <p v-if="error" class="error">{{ error }}</p>
+    <p v-if="message" class="message">{{ message }}</p>
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref } from "vue";
-import api from "../services/api";
 import { useRouter } from "vue-router";
+import api from "../services/api";
 
-export default {
-  setup() {
-    const email = ref("");
-    const password = ref("");
-    const full_name = ref("");
-    const address = ref("");
-    const pin_code = ref("");
-    const error = ref(null);
-    const message = ref(null);
-    const router = useRouter();
+const email = ref("");
+const password = ref("");
+const full_name = ref("");
+const address = ref("");
+const pin_code = ref("");
+const error = ref(null);
+const message = ref(null);
+const router = useRouter();
 
-    async function onSignup() {
-      error.value = null;
-      try {
-        await api.post("/auth/register", {
-          email: email.value,
-          password: password.value,
-          full_name: full_name.value,
-          address: address.value,
-          pin_code: pin_code.value,
-        });
-        message.value = "Registered successfully! Redirecting to login…";
-        setTimeout(() => router.push("/login"), 1500);
-      } catch (err) {
-        error.value = err.response?.data?.msg || "Registration failed";
-      }
-    }
-
-    return {
+async function onSignup() {
+  error.value = null;
+  message.value = null;
+  try {
+    await api.post("/auth/register", {
       email,
       password,
       full_name,
       address,
       pin_code,
-      error,
-      message,
-      onSignup,
-    };
-  },
-};
+    });
+    message.value = "Registered successfully! Redirecting to login…";
+    setTimeout(() => router.push("/login"), 1500);
+  } catch (e) {
+    error.value = e.response?.data?.msg || "Registration failed";
+  }
+}
 </script>
+
+<style>
+.auth-form {
+  max-width: 400px;
+  margin: 2rem auto;
+}
+.auth-form div {
+  margin-bottom: 1rem;
+}
+.error {
+  color: red;
+}
+.message {
+  color: green;
+}
+</style>

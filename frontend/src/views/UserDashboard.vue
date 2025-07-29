@@ -1,28 +1,20 @@
 <!-- frontend/src/views/UserDashboard.vue -->
 
 <template>
-  <div style="text-align: center; margin: 2rem">
-    <h2>User Dashboard</h2>
-    <p>{{ msg }}</p>
+  <div class="user-dashboard">
+    <h1>User Dashboard</h1>
+    <p>Welcome back, {{ fullName }}!</p>
   </div>
 </template>
 
-<script>
-import { ref, onMounted } from "vue";
-import api from "../services/api";
-
-export default {
-  setup() {
-    const msg = ref("Loading…");
-    onMounted(async () => {
-      try {
-        const { data } = await api.get("/user/dashboard");
-        msg.value = data.msg;
-      } catch {
-        msg.value = "Failed to load dashboard";
-      }
-    });
-    return { msg };
-  },
-};
+<script setup>
+import { computed } from "vue";
+const fullName = computed(() => localStorage.getItem("full_name") || "User");
 </script>
+
+<style>
+.user-dashboard {
+  text-align: center;
+  padding: 2rem;
+}
+</style>

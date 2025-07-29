@@ -1,36 +1,31 @@
 <!-- frontend/src/views/Login.vue -->
 
 <template>
-  <div style="max-width: 400px; margin: 2rem auto">
+  <div class="auth-form">
     <h2>Login</h2>
     <form @submit.prevent="onLogin">
       <div>
-        <label>Email:</label><br />
-        <input v-model="email" type="email" required />
+        <label>Email:</label><input v-model="email" type="email" required />
       </div>
-      <div style="margin-top: 0.5rem">
-        <label>Password:</label><br />
-        <input v-model="password" type="password" required />
+      <div>
+        <label>Password:</label
+        ><input v-model="password" type="password" required />
       </div>
-      <div style="margin-top: 1rem">
-        <button type="submit">Login</button>
-      </div>
+      <button type="submit">Login</button>
     </form>
-    <p v-if="error" style="color: red">{{ error }}</p>
+    <p v-if="error" class="error">{{ error }}</p>
   </div>
 </template>
 
 <script setup>
 import { ref, inject } from "vue";
-import api from "../services/api";
 import { useRouter } from "vue-router";
+import api from "../services/api";
 
 const email = ref("");
 const password = ref("");
 const error = ref(null);
 const router = useRouter();
-
-// Inject the reactive auth store
 const auth = inject("auth");
 
 async function onLogin() {
@@ -40,19 +35,26 @@ async function onLogin() {
       email: email.value,
       password: password.value,
     });
-
-    // 1) Persist to localStorage
     localStorage.setItem("access_token", data.access_token);
     localStorage.setItem("role", data.role);
-
-    // 2) Update reactive store
     auth.token = data.access_token;
     auth.role = data.role;
-
-    // 3) Redirect to appropriate dashboard
     router.push(data.role === "admin" ? "/admin/dashboard" : "/user/dashboard");
-  } catch (err) {
-    error.value = err.response?.data?.msg || "Login failed";
+  } catch (e) {
+    error.value = e.response?.data?.msg || "Login failed";
   }
 }
 </script>
+
+<style>
+.auth-form {
+  max-width: 400px;
+  margin: 2rem auto;
+}
+.auth-form div {
+  margin-bottom: 1rem;
+}
+.error {
+  color: red;
+}
+</style>
