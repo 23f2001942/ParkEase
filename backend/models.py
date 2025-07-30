@@ -27,13 +27,13 @@ class User(db.Model):
     pin_code      = db.Column(db.String(10))
     created_at    = db.Column(
                        DateTime(timezone=True),
-                       default=lambda: datetime.now(timezone.utc),
+                       default=lambda: datetime.now(),
                        nullable=False
                     )
     updated_at    = db.Column(
                        DateTime(timezone=True),
-                       default=lambda: datetime.now(timezone.utc),
-                       onupdate=lambda: datetime.now(timezone.utc),
+                       default=lambda: datetime.now(),
+                       onupdate=lambda: datetime.now(),
                        nullable=False
                     )
 
@@ -59,13 +59,13 @@ class ParkingLot(db.Model):
     total_spots    = db.Column(db.Integer, nullable=False)
     created_at     = db.Column(
                        DateTime(timezone=True),
-                       default=lambda: datetime.now(timezone.utc),
+                       default=lambda: datetime.now(),
                        nullable=False
                     )
     updated_at     = db.Column(
                        DateTime(timezone=True),
-                       default=lambda: datetime.now(timezone.utc),
-                       onupdate=lambda: datetime.now(timezone.utc),
+                       default=lambda: datetime.now(),
+                       onupdate=lambda: datetime.now(),
                        nullable=False
                     )
 
@@ -89,13 +89,13 @@ class ParkingSpot(db.Model):
                    )
     created_at    = db.Column(
                        DateTime(timezone=True),
-                       default=lambda: datetime.now(timezone.utc),
+                       default=lambda: datetime.now(),
                        nullable=False
                    )
     updated_at    = db.Column(
                        DateTime(timezone=True),
-                       default=lambda: datetime.now(timezone.utc),
-                       onupdate=lambda: datetime.now(timezone.utc),
+                       default=lambda: datetime.now(),
+                       onupdate=lambda: datetime.now(),
                        nullable=False
                    )
 
@@ -118,7 +118,7 @@ class Reservation(db.Model):
     vehicle_number    = db.Column(db.String(20), nullable=False)
     parking_timestamp = db.Column(
                            DateTime(timezone=True),
-                           default=lambda: datetime.now(timezone.utc),
+                           default=lambda: datetime.now(),
                            nullable=False
                         )
     leaving_timestamp = db.Column(DateTime(timezone=True))
@@ -131,13 +131,13 @@ class Reservation(db.Model):
                         )
     created_at        = db.Column(
                            DateTime(timezone=True),
-                           default=lambda: datetime.now(timezone.utc),
+                           default=lambda: datetime.now(),
                            nullable=False
                         )
     updated_at        = db.Column(
                            DateTime(timezone=True),
-                           default=lambda: datetime.now(timezone.utc),
-                           onupdate=lambda: datetime.now(timezone.utc),
+                           default=lambda: datetime.now(),
+                           onupdate=lambda: datetime.now(),
                            nullable=False
                         )
 

@@ -100,7 +100,8 @@ def list_reservations():
             'vehicle_number': r.vehicle_number,
             'start_time':     r.parking_timestamp.isoformat(),
             'end_time':       (r.leaving_timestamp.isoformat() if r.leaving_timestamp else None),
-            'status':         r.status
+            'status':         r.status,
+            'parking_cost':   float(r.parking_cost or 0) 
         })
 
     return jsonify(reservations=out), 200
@@ -115,7 +116,6 @@ def release_reservation(res_id):
 
     identity = get_jwt_identity()
     user_id = identity.get('id') if isinstance(identity, dict) else identity
-
     if res.user_id != int(user_id):
         return jsonify(msg="Forbidden"), 403
 
@@ -123,7 +123,18 @@ def release_reservation(res_id):
         return jsonify(msg="Already released"), 400
 
     res.status            = 'done'
-    res.leaving_timestamp = datetime.now(timezone.utc)
+    res.leaving_timestamp = datetime.now()
+    delta = res.leaving_timestamp - res.parking_timestamp
+    hours = delta.total_seconds() / 3600
+
+    lot = ParkingLot.query \
+        .join(ParkingSpot, ParkingSpot.lot_id == ParkingLot.id) \
+        .filter(ParkingSpot.id == res.spot_id) \
+        .first()
+    rate = float(lot.price_per_hour) if lot else 0
+
+    cost = round(hours * rate, 2)
+    res.parking_cost = cost
 
     spot = ParkingSpot.query.get_or_404(res.spot_id)
     spot.status = 'A'
@@ -133,5 +144,6 @@ def release_reservation(res_id):
     return jsonify({
         'reservation_id': res.id,
         'end_time':       res.leaving_timestamp.isoformat(),
-        'status':         res.status
+        'status':         res.status,
+        'parking_cost':   cost
     }), 200

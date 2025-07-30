@@ -11,13 +11,14 @@ admin_bp = Blueprint('admin_bp', __name__, url_prefix='/admin')
 
 def lot_summary(lot):
     occupied = sum(1 for s in lot.spots if s.status == 'O')
+    total    = len(lot.spots)
     return {
-        'id': lot.id,
-        'name': lot.name,
-        'address': lot.address,
-        'pin_code': lot.pin_code,
+        'id':             lot.id,
+        'name':           lot.name,
+        'address':        lot.address,
+        'pin_code':       lot.pin_code,
         'price_per_hour': float(lot.price_per_hour),
-        'total_spots': lot.total_spots,
+        'total_spots':    total,
         'occupied_spots': occupied
     }
 
@@ -47,9 +48,8 @@ def create_lot():
         total_spots=data['total_spots']
     )
     db.session.add(lot)
-    db.session.flush() 
+    db.session.flush()
 
-    # auto-generate spots
     for num in range(1, lot.total_spots + 1):
         spot = ParkingSpot(lot_id=lot.id, spot_number=num)
         db.session.add(spot)
@@ -76,23 +76,26 @@ def get_lot(lot_id):
 @jwt_required()
 @role_required('admin')
 def list_spots_by_lot(lot_id):
+    """NEW: list every spot in a lot (with reservation details if occupied)"""
     lot = ParkingLot.query.get_or_404(lot_id)
 
-    spots = ParkingSpot.query.filter_by(lot_id=lot_id).order_by(ParkingSpot.spot_number).all()
+    spots = ParkingSpot.query.filter_by(lot_id=lot_id) \
+                             .order_by(ParkingSpot.spot_number) \
+                             .all()
 
     out = []
     for s in spots:
         spot_data = {
-            'id': s.id,
+            'id':          s.id,
             'spot_number': s.spot_number,
-            'status': s.status
+            'status':      s.status
         }
         if s.status == 'O':
             res = Reservation.query.filter_by(spot_id=s.id, status='ongoing').first()
             if res:
                 spot_data.update({
-                    'user_id':      res.user_id,
-                    'vehicle_number': res.vehicle_number,
+                    'user_id':           res.user_id,
+                    'vehicle_number':    res.vehicle_number,
                     'parking_timestamp': res.parking_timestamp.isoformat()
                 })
         out.append(spot_data)
@@ -107,9 +110,9 @@ def update_lot(lot_id):
     lot = ParkingLot.query.get_or_404(lot_id)
     data = request.get_json() or {}
 
-    lot.name = data.get('name', lot.name)
-    lot.address = data.get('address', lot.address)
-    lot.pin_code = data.get('pin_code', lot.pin_code)
+    lot.name           = data.get('name', lot.name)
+    lot.address        = data.get('address', lot.address)
+    lot.pin_code       = data.get('pin_code', lot.pin_code)
     lot.price_per_hour = data.get('price_per_hour', lot.price_per_hour)
 
     new_total = data.get('total_spots', lot.total_spots)
@@ -149,17 +152,17 @@ def delete_lot(lot_id):
 def get_spot(spot_id):
     spot = ParkingSpot.query.get_or_404(spot_id)
     data = {
-        'id': spot.id,
-        'lot_id': spot.lot_id,
+        'id':          spot.id,
+        'lot_id':      spot.lot_id,
         'spot_number': spot.spot_number,
-        'status': spot.status
+        'status':      spot.status
     }
     if spot.status == 'O':
         res = Reservation.query.filter_by(spot_id=spot.id, status='ongoing').first()
         if res:
             data.update({
-                'user_id': res.user_id,
-                'vehicle_number': res.vehicle_number,
+                'user_id':           res.user_id,
+                'vehicle_number':    res.vehicle_number,
                 'parking_timestamp': res.parking_timestamp.isoformat(),
             })
     return jsonify(data), 200
@@ -181,16 +184,15 @@ def delete_spot(spot_id):
 @jwt_required()
 @role_required('admin')
 def list_users():
-    users = User.query.all()
     users = User.query.filter_by(role='user').all()
     out = []
     for u in users:
         out.append({
-            'id': u.id,
-            'email': u.email,
-            'username': u.username,
+            'id':        u.id,
+            'email':     u.email,
+            'username':  u.username,
             'full_name': u.full_name,
-            'address': u.address,
-            'pin_code': u.pin_code
+            'address':   u.address,
+            'pin_code':  u.pin_code
         })
     return jsonify(out), 200

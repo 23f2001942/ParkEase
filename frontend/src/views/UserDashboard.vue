@@ -11,6 +11,7 @@
           <th>Vehicle</th>
           <th>Start Time</th>
           <th>End Time</th>
+          <th>Cost</th>
           <th>Status</th>
           <th>Action</th>
         </tr>
@@ -22,6 +23,9 @@
           <td>{{ r.vehicle_number }}</td>
           <td>{{ r.start_time }}</td>
           <td>{{ r.end_time || "—" }}</td>
+          <td>
+            {{ r.parking_cost != null ? r.parking_cost.toFixed(2) : "—" }}
+          </td>
           <td>{{ r.status }}</td>
           <td>
             <router-link

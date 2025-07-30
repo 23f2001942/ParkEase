@@ -11,6 +11,7 @@ import AdminDashboard from "../views/AdminDashboard.vue";
 import AddLot from "../views/AddLot.vue";
 import EditLot from "../views/EditLot.vue";
 import LotSpots from "../views/LotSpots.vue";
+import AdminSpotView from "../views/AdminSpotView.vue";
 import UsersView from "../views/UsersView.vue";
 import SearchView from "../views/SearchView.vue";
 import AdminSummaryView from "../views/AdminSummaryView.vue";
@@ -44,6 +45,12 @@ const routes = [
         path: "lots/:id/spots",
         name: "LotSpots",
         component: LotSpots,
+        props: true,
+      },
+      {
+        path: "spots/:spotId",
+        name: "AdminSpotView",
+        component: AdminSpotView,
         props: true,
       },
       { path: "users", name: "Users", component: UsersView },

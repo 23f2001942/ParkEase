@@ -5,14 +5,15 @@
     <h1>Spots for "{{ lotName }}"</h1>
 
     <div v-if="Array.isArray(spots) && spots.length" class="spots-grid">
-      <div
+      <router-link
         v-for="spot in spots"
         :key="spot.id"
+        :to="{ name: 'AdminSpotView', params: { spotId: spot.id } }"
         class="spot"
-        :class="{ occupied: spot.status === 'occupied' }"
+        :class="{ occupied: spot.status === 'O' }"
       >
-        {{ spot.status }}
-      </div>
+        {{ spot.status === "O" ? "O" : "A" }}
+      </router-link>
     </div>
 
     <p v-else>No spots found.</p>
@@ -32,12 +33,10 @@ const spots = ref([]);
 
 async function fetchData() {
   try {
-    // fetch lot info
-    const { data: lot } = await api.get(`/admin/lots/${lotId}`);
-    lotName.value = lot.name;
-    // fetch spots
-    const { data: s } = await api.get(`/admin/lots/${lotId}/spots`);
-    spots.value = Array.isArray(s.spots) ? s.spots : s;
+    // single call returns { id, name, …, spots: [ {id, spot_number, status}, … ] }
+    const { data } = await api.get(`/admin/lots/${lotId}`);
+    lotName.value = data.name;
+    spots.value = Array.isArray(data.spots) ? data.spots : [];
   } catch (e) {
     console.error("fetch spots failed:", e);
     spots.value = [];
@@ -55,15 +54,17 @@ onMounted(fetchData);
   margin-top: 1rem;
 }
 .spot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
-  line-height: 40px;
-  text-align: center;
   border: 1px solid #333;
-  cursor: default;
+  text-decoration: none;
+  color: inherit;
 }
 .spot.occupied {
   background: #f88;
-  color: white;
+  color: #fff;
 }
 </style>
