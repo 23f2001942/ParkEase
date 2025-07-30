@@ -13,9 +13,14 @@ import EditLot from "../views/EditLot.vue";
 import LotSpots from "../views/LotSpots.vue";
 import UsersView from "../views/UsersView.vue";
 import SearchView from "../views/SearchView.vue";
-import SummaryView from "../views/SummaryView.vue";
+import AdminSummaryView from "../views/AdminSummaryView.vue";
 
+import UserLayout from "../components/UserLayout.vue";
 import UserDashboard from "../views/UserDashboard.vue";
+import SearchLotsView from "../views/SearchLotsView.vue";
+import BookSpotView from "../views/BookSpotView.vue";
+import ReleaseSpotView from "../views/ReleaseSpotView.vue";
+import UserSummaryView from "../views/UserSummaryView.vue";
 
 const routes = [
   { path: "/", name: "Home", component: HomeView },
@@ -28,36 +33,52 @@ const routes = [
     meta: { requiresAuth: true, role: "admin" },
     children: [
       { path: "dashboard", name: "AdminDashboard", component: AdminDashboard },
-
       { path: "lots/add", name: "AddLot", component: AddLot },
-
       {
         path: "lots/:id/edit",
         name: "EditLot",
         component: EditLot,
         props: true,
       },
-
       {
         path: "lots/:id/spots",
         name: "LotSpots",
         component: LotSpots,
         props: true,
       },
-
       { path: "users", name: "Users", component: UsersView },
       { path: "search", name: "Search", component: SearchView },
-      { path: "summary", name: "Summary", component: SummaryView },
-
+      {
+        path: "summary",
+        name: "AdminSummaryView",
+        component: AdminSummaryView,
+      },
       { path: "", redirect: { name: "AdminDashboard" } },
     ],
   },
 
   {
-    path: "/user/dashboard",
-    name: "UserDashboard",
-    component: UserDashboard,
+    path: "/user",
+    component: UserLayout,
     meta: { requiresAuth: true, role: "user" },
+    children: [
+      { path: "dashboard", component: UserDashboard, name: "UserDashboard" },
+      { path: "search", component: SearchLotsView, name: "SearchLots" },
+      {
+        path: "book/:lot_id",
+        component: BookSpotView,
+        name: "BookSpot",
+        props: true,
+      },
+      {
+        path: "release/:res_id",
+        component: ReleaseSpotView,
+        name: "ReleaseSpot",
+        props: true,
+      },
+      { path: "summary", component: UserSummaryView, name: "UserSummaryView" },
+      { path: "", redirect: { name: "UserDashboard" } },
+    ],
   },
 
   { path: "/:pathMatch(.*)*", redirect: "/" },

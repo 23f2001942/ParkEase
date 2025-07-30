@@ -1,17 +1,16 @@
-<!-- frontend/src/components/AdminLayout.vue -->
+<!-- frontend/src/components/UserLayout.vue -->
 
 <template>
   <div>
-    <div class="admin-nav">
-      <div class="nav-left">Welcome, Admin!</div>
+    <nav class="user-nav">
+      <div class="nav-left">Welcome, User!</div>
       <div class="nav-right">
-        <router-link to="/admin/dashboard">Home</router-link> |
-        <router-link to="/admin/users">Users</router-link> |
-        <router-link to="/admin/search">Search</router-link> |
-        <router-link to="/admin/summary">Summary</router-link> |
+        <router-link to="/user/dashboard">Home</router-link> |
+        <router-link to="/user/search">Search Lots</router-link> |
+        <router-link to="/user/summary">Summary</router-link> |
         <a href="#" @click.prevent="logout">Logout</a>
       </div>
-    </div>
+    </nav>
     <router-view />
   </div>
 </template>
@@ -33,23 +32,18 @@ function logout() {
 </script>
 
 <style>
-.admin-nav {
+.user-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
   border-bottom: 1px solid #eee;
 }
-.nav-left {
-  flex: 1;
-  text-align: left;
+.user-nav span {
+  font-weight: bold;
 }
-.nav-center {
-  flex: 1;
-  text-align: center;
-}
-.nav-right {
-  flex: 1;
-  text-align: right;
+.user-nav a,
+.user-nav .router-link-active {
+  margin: 0 0.5rem;
 }
 </style>
