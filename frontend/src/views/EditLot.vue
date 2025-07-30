@@ -1,3 +1,5 @@
+<!-- frontend/src/views/EditLot.vue -->
+
 <template>
   <div style="padding: 2rem; max-width: 600px; margin: auto">
     <h1>Edit Parking Lot</h1>

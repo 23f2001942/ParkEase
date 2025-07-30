@@ -2,7 +2,7 @@
 
 <template>
   <div>
-    <nav v-if="!isAdminRoute" class="main-nav">
+    <nav v-if="!isAdminRoute && !isUserRoute" class="main-nav">
       <div class="nav-left">Welcome to ParkEase</div>
       <div class="nav-center">
         <router-link to="/">Home</router-link>
@@ -36,6 +36,7 @@ const dashboardPath = computed(() =>
   auth.role === "admin" ? "/admin/dashboard" : "/user/dashboard"
 );
 const isAdminRoute = computed(() => route.path.startsWith("/admin"));
+const isUserRoute = computed(() => route.path.startsWith("/user"));
 
 function logout() {
   localStorage.removeItem("access_token");

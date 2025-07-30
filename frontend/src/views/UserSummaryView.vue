@@ -1,3 +1,5 @@
+<!-- frontend/src/views/UserSummaryView.vue -->
+
 <template>
   <div style="padding: 2rem">
     <h1>Your Parking Summary</h1>

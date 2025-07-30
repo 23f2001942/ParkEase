@@ -1,3 +1,5 @@
+<!-- frontend/src/views/BookSpotView.vue -->
+
 <template>
   <div style="padding: 2rem; max-width: 400px; margin: auto">
     <h1>Book Lot #{{ lotId }}</h1>

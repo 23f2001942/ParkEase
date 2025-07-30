@@ -1,4 +1,4 @@
-<!-- frontend/src/views/SummaryView.vue -->
+<!-- frontend/src/views/AdminSummaryView.vue -->
 
 <template>
   <div style="padding: 2rem">

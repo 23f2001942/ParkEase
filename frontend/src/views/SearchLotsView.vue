@@ -1,3 +1,5 @@
+<!-- frontend/src/views/SearchLotsView.vue -->
+
 <template>
   <div style="padding: 2rem; max-width: 600px; margin: auto">
     <h1>Search Parking Lots</h1>
