@@ -1,6 +1,7 @@
 # backend/user_routes.py
 
-from datetime import datetime, timezone
+from datetime import datetime
+from sqlalchemy import func
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from auth import role_required
@@ -147,3 +148,48 @@ def release_reservation(res_id):
         'status':         res.status,
         'parking_cost':   cost
     }), 200
+
+@user_bp.route('/summary', methods=['GET'])
+@jwt_required()
+@role_required('user')
+def user_summary():
+    """NEW: user’s spending & usage summary."""
+    identity = get_jwt_identity()
+    user_id = identity['id'] if isinstance(identity, dict) else identity
+
+    now = datetime.now()
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # total & monthly spent
+    total_spent = db.session.query(
+        func.coalesce(func.sum(Reservation.parking_cost), 0)
+    ).filter(Reservation.user_id == user_id).scalar() or 0
+
+    monthly_spent = db.session.query(
+        func.coalesce(func.sum(Reservation.parking_cost), 0)
+    ).filter(
+        Reservation.user_id == user_id,
+        Reservation.leaving_timestamp >= month_start
+    ).scalar() or 0
+
+    # count of all reservations
+    history_count = Reservation.query.filter_by(user_id=user_id).count()
+
+    # group by YYYY-MM
+    by_month_raw = db.session.query(
+        func.strftime('%Y-%m', Reservation.leaving_timestamp).label('month'),
+        func.coalesce(func.sum(Reservation.parking_cost), 0).label('spent')
+    ).filter(
+        Reservation.user_id == user_id
+    ).group_by('month').all()
+
+    by_month = [
+        {'month': m, 'spent': float(s)} for m, s in by_month_raw
+    ]
+
+    return jsonify(
+      history_count=history_count,
+      total_spent=float(total_spent),
+      monthly_spent=float(monthly_spent),
+      by_month=by_month
+    ), 200

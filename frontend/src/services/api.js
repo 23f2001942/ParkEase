@@ -2,9 +2,7 @@
 
 import axios from "axios";
 
-// Vue-CLI exposes only process.env.VUE_APP_*
 const baseURL = process.env.VUE_APP_API_BASE_URL || "http://127.0.0.1:5000";
-
 const api = axios.create({ baseURL });
 
 api.interceptors.request.use(
@@ -19,3 +17,11 @@ api.interceptors.request.use(
 );
 
 export default api;
+
+export function getAdminSummary() {
+  return api.get("/admin/summary");
+}
+
+export function getUserSummary() {
+  return api.get("/user/summary");
+}

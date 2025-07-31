@@ -1,5 +1,7 @@
 # backend/admin_routes.py
 
+from datetime import datetime, time
+from sqlalchemy import func
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from auth import role_required
@@ -196,3 +198,67 @@ def list_users():
             'pin_code':  u.pin_code
         })
     return jsonify(out), 200
+
+@admin_bp.route('/summary', methods=['GET'])
+@jwt_required()
+@role_required('admin')
+def admin_summary():
+    now = datetime.now()
+    today = now.date()
+    start_today = datetime.combine(today, time.min)
+    month_start = today.replace(day=1)
+    start_month = datetime.combine(month_start, time.min)
+
+    lots = ParkingLot.query.all()
+    by_lot = []
+    sum_revenue_month = 0
+    sum_occ_pct = 0.0
+
+    for lot in lots:
+        # occupancy metrics
+        total_spots = len(lot.spots)
+        occupied_spots = sum(1 for s in lot.spots if s.status == 'O')
+        occ_pct = (occupied_spots / total_spots) if total_spots else 0
+
+        # revenue today for this lot
+        rev_today = (
+            db.session.query(func.coalesce(func.sum(Reservation.parking_cost), 0))
+            .join(ParkingSpot, ParkingSpot.id == Reservation.spot_id)
+            .filter(
+                ParkingSpot.lot_id == lot.id,
+                Reservation.leaving_timestamp >= start_today,
+                Reservation.status == 'done'
+            )
+            .scalar()
+        ) or 0
+
+        # revenue this month for this lot
+        rev_month = (
+            db.session.query(func.coalesce(func.sum(Reservation.parking_cost), 0))
+            .join(ParkingSpot, ParkingSpot.id == Reservation.spot_id)
+            .filter(
+                ParkingSpot.lot_id == lot.id,
+                Reservation.leaving_timestamp >= start_month,
+                Reservation.status == 'done'
+            )
+            .scalar()
+        ) or 0
+
+        sum_revenue_month += rev_month
+        sum_occ_pct += occ_pct
+
+        by_lot.append({
+            'lot_id':         lot.id,
+            'lot_name':       lot.name,
+            'total_spots':    total_spots,
+            'occupied_pct':   occ_pct,
+            'revenue_today':  float(rev_today),
+            'revenue_month':  float(rev_month)
+        })
+
+    overall = {
+        'total_revenue_month': float(sum_revenue_month),
+        'avg_occupancy_pct':   (sum_occ_pct / len(lots)) if lots else 0
+    }
+
+    return jsonify(by_lot=by_lot, overall=overall), 200
