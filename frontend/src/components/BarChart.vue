@@ -1,3 +1,5 @@
+<!-- frontend/src/components/BarChart.vue -->
+
 <template>
   <canvas ref="canvas"></canvas>
 </template>

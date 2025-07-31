@@ -5,11 +5,12 @@
     <h2>Login</h2>
     <form @submit.prevent="onLogin">
       <div>
-        <label>Email:</label><input v-model="email" type="email" required />
+        <label>Email:</label>
+        <input v-model="email" type="email" required />
       </div>
       <div>
-        <label>Password:</label
-        ><input v-model="password" type="password" required />
+        <label>Password:</label>
+        <input v-model="password" type="password" required />
       </div>
       <button type="submit">Login</button>
     </form>
@@ -24,21 +25,26 @@ import api from "../services/api";
 
 const email = ref("");
 const password = ref("");
-const error = ref(null);
+const error = ref("");
 const router = useRouter();
 const auth = inject("auth");
 
 async function onLogin() {
-  error.value = null;
+  error.value = "";
   try {
+    // again, pass .value
     const { data } = await api.post("/auth/login", {
       email: email.value,
       password: password.value,
     });
+
+    // store token + role
     localStorage.setItem("access_token", data.access_token);
     localStorage.setItem("role", data.role);
     auth.token = data.access_token;
     auth.role = data.role;
+
+    // redirect based on role
     router.push(data.role === "admin" ? "/admin/dashboard" : "/user/dashboard");
   } catch (e) {
     error.value = e.response?.data?.msg || "Login failed";

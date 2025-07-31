@@ -1,3 +1,5 @@
+<!-- frontend/src/components/LineChart.vue -->
+
 <template>
   <canvas ref="canvas"></canvas>
 </template>

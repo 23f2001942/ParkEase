@@ -1,23 +1,33 @@
-<!-- frontend/src/views/Signup.vue -->
-
 <template>
   <div class="auth-form">
     <h2>Sign Up</h2>
     <form @submit.prevent="onSignup">
       <div>
-        <label>Email:</label><input v-model="email" type="email" required />
+        <label>Email:</label>
+        <input v-model="email" type="email" required />
       </div>
       <div>
-        <label>Password:</label
-        ><input v-model="password" type="password" required />
+        <label>Password:</label>
+        <input v-model="password" type="password" required />
       </div>
-      <div><label>Full Name:</label><input v-model="full_name" required /></div>
-      <div><label>Address:</label><textarea v-model="address" required /></div>
-      <div><label>Pin Code:</label><input v-model="pin_code" required /></div>
+      <div>
+        <label>Full Name:</label>
+        <input v-model="full_name" required />
+      </div>
+      <div>
+        <label>Address:</label>
+        <textarea v-model="address" required></textarea>
+      </div>
+      <div>
+        <label>Pin Code:</label>
+        <input v-model="pin_code" required />
+      </div>
       <button type="submit">Register</button>
     </form>
+
+    <!-- only show one of these -->
     <p v-if="error" class="error">{{ error }}</p>
-    <p v-if="message" class="message">{{ message }}</p>
+    <p v-else-if="message" class="message">{{ message }}</p>
   </div>
 </template>
 
@@ -31,23 +41,29 @@ const password = ref("");
 const full_name = ref("");
 const address = ref("");
 const pin_code = ref("");
-const error = ref(null);
-const message = ref(null);
+const error = ref("");
+const message = ref("");
 const router = useRouter();
 
 async function onSignup() {
-  error.value = null;
-  message.value = null;
+  error.value = "";
+  message.value = "";
+
   try {
-    await api.post("/auth/register", {
-      email,
-      password,
-      full_name,
-      address,
-      pin_code,
+    const resp = await api.post("/auth/register", {
+      email: email.value,
+      password: password.value,
+      full_name: full_name.value,
+      address: address.value,
+      pin_code: pin_code.value,
     });
-    message.value = "Registered successfully! Redirecting to login…";
-    setTimeout(() => router.push("/login"), 1500);
+
+    if (resp.status === 201) {
+      message.value = "Registered! Redirecting to login…";
+      setTimeout(() => router.push("/login"), 1500);
+    } else {
+      error.value = resp.data.msg || "Registration failed";
+    }
   } catch (e) {
     error.value = e.response?.data?.msg || "Registration failed";
   }

@@ -9,13 +9,13 @@ celery = Celery(
     backend=Config.CELERY_RESULT_BACKEND,
 )
 celery.conf.update(
-    task_serializer   = 'json',
-    result_serializer = 'json',
-    accept_content    = ['json'],
-    timezone          = 'UTC',
+    task_serializer='json',
+    result_serializer='json',
+    accept_content=['json'],
+    timezone='UTC',
 )
-# autodiscover the tasks.py module
-celery.autodiscover_tasks(['tasks'])
 
-if __name__=='__main__':
+import tasks
+
+if __name__ == '__main__':
     celery.start()

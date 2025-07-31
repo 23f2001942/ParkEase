@@ -1,3 +1,5 @@
+<!-- frontend/src/components/DoughnutChart.vue -->
+
 <template>
   <canvas ref="canvas"></canvas>
 </template>
