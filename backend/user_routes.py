@@ -2,18 +2,22 @@
 
 from datetime import datetime
 from sqlalchemy import func
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from auth import role_required
 from db import db
 from models import ParkingLot, ParkingSpot, Reservation
+from cache import cache 
 
 user_bp = Blueprint('user_bp', __name__, url_prefix='/user')
-
 
 @user_bp.route('/lots', methods=['GET'])
 @jwt_required()
 @role_required('user')
+@cache.cached(
+    timeout=30,
+    key_prefix=lambda: f"user:lots:pin={request.args.get('pin_code','')}|loc={request.args.get('location','')}"
+)
 def list_available_lots():
     loc = request.args.get('location')
     pin = request.args.get('pin_code')
@@ -64,6 +68,8 @@ def reserve_spot():
     )
     db.session.add(res)
     db.session.commit()
+    cache.delete_pattern("user:lots:*") 
+    cache.delete("admin:lots")
 
     return jsonify({
         'reservation_id': res.id,
@@ -76,6 +82,7 @@ def reserve_spot():
 @user_bp.route('/reservations', methods=['GET'])
 @jwt_required()
 @role_required('user')
+@cache.cached(timeout=60, key_prefix=lambda: f"user:{get_jwt_identity()['id']}:reservations")
 def list_reservations():
     identity = get_jwt_identity()
     uid = identity['id'] if isinstance(identity, dict) else identity
@@ -142,6 +149,11 @@ def release_reservation(res_id):
 
     db.session.commit()
 
+    uid = get_jwt_identity().get('id') if isinstance(get_jwt_identity(), dict) else get_jwt_identity()
+    cache.delete(f"user:{uid}:reservations") 
+    cache.delete("user:lots:*") 
+    cache.delete("admin:lots")
+
     return jsonify({
         'reservation_id': res.id,
         'end_time':       res.leaving_timestamp.isoformat(),
@@ -152,6 +164,7 @@ def release_reservation(res_id):
 @user_bp.route('/summary', methods=['GET'])
 @jwt_required()
 @role_required('user')
+@cache.cached(timeout=60, key_prefix=lambda: f"user:{get_jwt_identity()['id']}:summary")
 def user_summary():
     """NEW: user’s spending & usage summary."""
     identity = get_jwt_identity()

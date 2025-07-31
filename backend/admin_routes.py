@@ -2,14 +2,14 @@
 
 from datetime import datetime, time
 from sqlalchemy import func
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from auth import role_required
 from db import db
 from models import ParkingLot, ParkingSpot, User, Reservation
+from cache import cache 
 
 admin_bp = Blueprint('admin_bp', __name__, url_prefix='/admin')
-
 
 def lot_summary(lot):
     occupied = sum(1 for s in lot.spots if s.status == 'O')
@@ -28,6 +28,7 @@ def lot_summary(lot):
 @admin_bp.route('/lots', methods=['GET'])
 @jwt_required()
 @role_required('admin')
+@cache.cached(timeout=30, key_prefix="admin:lots") 
 def list_lots():
     lots = ParkingLot.query.all()
     return jsonify([lot_summary(l) for l in lots]), 200
@@ -57,6 +58,7 @@ def create_lot():
         db.session.add(spot)
 
     db.session.commit()
+    cache.delete("admin:lots")
     return jsonify(lot_summary(lot)), 201
 
 
@@ -77,8 +79,8 @@ def get_lot(lot_id):
 @admin_bp.route('/lots/<int:lot_id>/spots', methods=['GET'])
 @jwt_required()
 @role_required('admin')
+@cache.cached(timeout=15, key_prefix=lambda: f"admin:lot:{request.view_args['lot_id']}:spots")
 def list_spots_by_lot(lot_id):
-    """NEW: list every spot in a lot (with reservation details if occupied)"""
     lot = ParkingLot.query.get_or_404(lot_id)
 
     spots = ParkingSpot.query.filter_by(lot_id=lot_id) \
@@ -135,6 +137,8 @@ def update_lot(lot_id):
             db.session.delete(s)
 
     db.session.commit()
+    cache.delete("admin:lots")
+    cache.delete(f"admin:lot:{lot_id}:spots")
     return jsonify(lot_summary(lot)), 200
 
 
@@ -145,6 +149,8 @@ def delete_lot(lot_id):
     lot = ParkingLot.query.get_or_404(lot_id)
     db.session.delete(lot)
     db.session.commit()
+    cache.delete("admin:lots") 
+    cache.delete(f"admin:lot:{lot_id}:spots")
     return jsonify(msg="Deleted"), 200
 
 
@@ -179,6 +185,7 @@ def delete_spot(spot_id):
         return jsonify(msg="Cannot delete occupied spot"), 400
     db.session.delete(spot)
     db.session.commit()
+    cache.delete(f"admin:lot:{spot.lot_id}:spots")
     return jsonify(msg="Spot deleted"), 200
 
 
@@ -202,6 +209,7 @@ def list_users():
 @admin_bp.route('/summary', methods=['GET'])
 @jwt_required()
 @role_required('admin')
+@cache.cached(timeout=60, key_prefix="admin:summary") 
 def admin_summary():
     now = datetime.now()
     today = now.date()

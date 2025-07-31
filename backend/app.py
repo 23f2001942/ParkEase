@@ -4,7 +4,7 @@ import click
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-from werkzeug.security import generate_password_hash
+from cache import cache 
 
 from config import Config
 from db import db
@@ -17,6 +17,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    cache.init_app(app)
     db.init_app(app)
     JWTManager(app)
     CORS(app)
@@ -29,6 +30,7 @@ def create_app(config_class=Config):
     return app
 
 app = create_app()
+       
 
 @app.cli.command('init-db')
 def init_db():
