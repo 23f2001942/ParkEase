@@ -4,6 +4,7 @@ import click
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from flask_mail import Mail
 from cache import cache 
 
 from config import Config
@@ -13,11 +14,14 @@ from routes import routes_bp
 from admin_routes import admin_bp
 from user_routes import user_bp
 
+mail = Mail()
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
     cache.init_app(app)
+    mail.init_app(app)
     db.init_app(app)
     JWTManager(app)
     CORS(app)
