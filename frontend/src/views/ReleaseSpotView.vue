@@ -53,7 +53,7 @@ async function fetchData() {
     startTime.value = r.start_time;
     releaseTime.value = r.end_time || "";
 
-    const lotResp = await api.get(`/admin/lots/${lotId.value}`);
+    const lotResp = await api.get(`/user/lots/${lotId.value}`);
     pricePerHour.value = lotResp.data.price_per_hour;
 
     if (releaseTime.value) computeCost();

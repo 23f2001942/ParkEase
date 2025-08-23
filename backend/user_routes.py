@@ -10,6 +10,10 @@ from models import ParkingLot, ParkingSpot, Reservation
 from cache import cache 
 
 user_bp = Blueprint('user_bp', __name__, url_prefix='/user')
+    
+def _uid():
+    identity = get_jwt_identity()
+    return identity.get('id') if isinstance(identity, dict) else identity
 
 @user_bp.route('/lots', methods=['GET'])
 @jwt_required()
@@ -52,11 +56,7 @@ def reserve_spot():
     if not spot:
         return jsonify(msg="No available spots"), 404
     
-    identity = get_jwt_identity()
-    if isinstance(identity, dict):
-        user_id = identity.get('id')
-    else:
-        user_id = identity
+    user_id = _uid()
 
     spot.status = 'O'
 
@@ -68,7 +68,7 @@ def reserve_spot():
     )
     db.session.add(res)
     db.session.commit()
-    cache.delete_pattern("user:lots:*") 
+    cache.delete("user:lots:*") 
     cache.delete("admin:lots")
 
     return jsonify({
@@ -82,10 +82,9 @@ def reserve_spot():
 @user_bp.route('/reservations', methods=['GET'])
 @jwt_required()
 @role_required('user')
-@cache.cached(timeout=60, key_prefix=lambda: f"user:{get_jwt_identity()['id']}:reservations")
+@cache.cached(timeout=60, key_prefix=lambda: f"user:{_uid()}:reservations")
 def list_reservations():
-    identity = get_jwt_identity()
-    uid = identity['id'] if isinstance(identity, dict) else identity
+    uid = _uid()
 
     resv_q = (Reservation.query
                    .filter_by(user_id=uid)
@@ -122,8 +121,7 @@ def list_reservations():
 def release_reservation(res_id):
     res = Reservation.query.get_or_404(res_id)
 
-    identity = get_jwt_identity()
-    user_id = identity.get('id') if isinstance(identity, dict) else identity
+    user_id = _uid()
     if res.user_id != int(user_id):
         return jsonify(msg="Forbidden"), 403
 
@@ -149,7 +147,7 @@ def release_reservation(res_id):
 
     db.session.commit()
 
-    uid = get_jwt_identity().get('id') if isinstance(get_jwt_identity(), dict) else get_jwt_identity()
+    uid = _uid()
     cache.delete(f"user:{uid}:reservations") 
     cache.delete("user:lots:*") 
     cache.delete("admin:lots")
@@ -164,16 +162,13 @@ def release_reservation(res_id):
 @user_bp.route('/summary', methods=['GET'])
 @jwt_required()
 @role_required('user')
-@cache.cached(timeout=60, key_prefix=lambda: f"user:{get_jwt_identity()['id']}:summary")
+@cache.cached(timeout=60, key_prefix=lambda: f"user:{_uid()}:summary")
 def user_summary():
-    """NEW: user’s spending & usage summary."""
-    identity = get_jwt_identity()
-    user_id = identity['id'] if isinstance(identity, dict) else identity
+    user_id = _uid()
 
     now = datetime.now()
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-    # total & monthly spent
     total_spent = db.session.query(
         func.coalesce(func.sum(Reservation.parking_cost), 0)
     ).filter(Reservation.user_id == user_id).scalar() or 0
@@ -185,10 +180,8 @@ def user_summary():
         Reservation.leaving_timestamp >= month_start
     ).scalar() or 0
 
-    # count of all reservations
     history_count = Reservation.query.filter_by(user_id=user_id).count()
 
-    # group by YYYY-MM
     by_month_raw = db.session.query(
         func.strftime('%Y-%m', Reservation.leaving_timestamp).label('month'),
         func.coalesce(func.sum(Reservation.parking_cost), 0).label('spent')
@@ -206,3 +199,18 @@ def user_summary():
       monthly_spent=float(monthly_spent),
       by_month=by_month
     ), 200
+
+
+@user_bp.route('/lots/<int:lot_id>', methods=['GET'])
+@jwt_required
+@role_required('user')
+def get_lot_info(lot_id):
+    lot = ParkingLot.query.get_or_404(lot_id)
+    
+    return jsonify({
+        'id' : lot.id,
+        'name' : lot.name,
+        'address' : lot.address,
+        'pin_code' : lot.pin_code,
+        'price_per_hour' : lot.price_per_hour
+    }), 200
