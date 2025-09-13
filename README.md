@@ -134,11 +134,38 @@ Authorization: Bearer <JWT>
 │   ├── celery_beat.py        # Beat schedule (optional entrypoint)
 │   └── requirements.txt
 ├── frontend/
-│   ├── src/
-│   │   ├── services/api.js   # Axios instance (VUE_APP_API_BASE_URL)
-│   │   └── views/components  # Vue pages and charts
-│   └── package.json
+│   └──src/
+│       ├── main.js                    # Vue app bootstrap
+│       ├── App.vue                    # Root component
+│       ├── router/
+│       │   └── index.js               # Route definitions and guards
+│       ├── services/
+│       │   └── api.js                 # Axios instance (reads VUE_APP_API_BASE_URL)
+│       ├── components/
+│       │   ├── AdminLayout.vue        # Shell/layout for admin pages
+│       │   ├── UserLayout.vue         # Shell/layout for user pages
+│       │   ├── BarChart.vue           # Chart.js bar wrapper
+│       │   ├── LineChart.vue          # Chart.js line wrapper
+│       │   └── DoughnutChart.vue      # Chart.js doughnut wrapper
+│       └── views/
+│           ├── HomeView.vue          # Landing page
+│           ├── Login.vue             # User login
+│           ├── Signup.vue            # User registration
+│           ├── UserDashboard.vue     # User dashboard overview
+│           ├── UserSummaryView.vue   # Spending summary (charts)
+│           ├── SearchLotsView.vue    # Search lots by pin/location
+│           ├── SearchView.vue        # Search view (alternate)
+│           ├── BookSpotView.vue      # Reserve a spot
+│           ├── ReleaseSpotView.vue   # Release ongoing reservation
+│           ├── AdminDashboard.vue    # Admin dashboard overview
+│           ├── AdminSummaryView.vue  # Admin analytics (revenue/occupancy)
+│           ├── UsersView.vue         # Manage user accounts
+│           ├── AddLot.vue            # Create a parking lot
+│           ├── EditLot.vue           # Edit a parking lot
+│           ├── LotSpots.vue          # View/manage spots in a lot
+│           └── AdminSpotView.vue     # Spot details (admin)
 └── README.md
+
 ```
 
 ---
