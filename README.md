@@ -178,12 +178,17 @@ export_user_history.delay(user_id=1)
 
 ---
 
-## 📜 License
-No license specified — internal academic project.
+## 👨‍💻 Developer
+
+**Shamanthak Reddy M**  
+BS in Data Science and Applications  
+IIT Madras Online Degree  
+Grade: **A (Excellent)** in Project
 
 ---
 
-**Developed by:**  
-**Shamanthak Reddy Mallu** (23f2001942)  
-_IIT Madras Online BSc in Data Science & Applications_  
-_Project for Modern Application Development II (May 2025)_
+## 📄 License
+
+This project is for academic demonstration purposes only.
+
+---
