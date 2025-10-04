@@ -1,7 +1,5 @@
 # 🚗 ParkEase — Vehicle Parking App
 
-![Vehicle Parking App]
-
 **ParkEase** is a full-stack multi-user web application for managing **4-wheeler parking lots**, featuring **role-based access**, **real-time reservations**, **automated billing**, **analytics dashboards**, and **scheduled Celery background tasks**.
 
 Built as part of **Modern Application Development II (MAD-II)**, the project adheres to the official *Vehicle Parking App V2* problem statement and milestones.
